@@ -1,6 +1,6 @@
 class hashMap {
-    constructor() {
-        this.mapArray = new Array(16);
+    constructor(buckets = 16) {
+        this.mapArray = new Array(buckets);
         this.size = 0
     }
 
@@ -9,7 +9,7 @@ class hashMap {
         const primeNumber = 31;
 
         for (let i = 0; i < key.length; i++) {
-            hashCode = (primeNumber * hashCode + key.charCodeAt(i)) % 16;
+            hashCode = (primeNumber * hashCode + key.charCodeAt(i)) % (this.mapArray.length);
         }
     
         return hashCode;
@@ -32,7 +32,10 @@ class hashMap {
             this.mapArray[hashedKey] = [];
             this.mapArray[hashedKey].push([key, value]);
         }
-        this.size++;    
+        this.size++;
+        if (this.size / this.mapArray.length > 0.75) {
+            this.grow(this.mapArray.length * 2);
+        }   
     }
 
     get(key) { 
@@ -84,15 +87,7 @@ class hashMap {
     clear() {
         // remove all entries in the hash map
         
-        const totalLength = (this.mapArray.length - 1);
-        let i = 0;
-        let counter = 0;
-
-        while (i < totalLength) {
-            delete this.mapArray[i]; 
-            counter++;
-            i++;
-        };
+        this.mapArray = new Array(16);
         this.size = 0;
         console.log('cleared');
     }
@@ -133,4 +128,17 @@ class hashMap {
         flatArray = this.mapArray.flat(1);
         console.log (flatArray);
     }
+
+    grow(newCapacity){
+        //clones mapArray into new mapArray with twice the buckets
+
+        const tempArray = this.mapArray.flat(1);
+        this.mapArray = new Array(newCapacity);
+        this.size = 0;
+
+        for (let i = 0; i < tempArray.length; i++) {
+                this.set(tempArray[i][0], tempArray[i][1]); 
+        }
+        console.log(`total buckets increased to ${this.mapArray.length}`);  
+    }   
 }
